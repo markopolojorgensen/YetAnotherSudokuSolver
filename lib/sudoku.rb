@@ -1,6 +1,7 @@
-# require "sudoku/version"
-# require 'pry'
 require 'colorize'
+
+# TODO: split this file up (bin, other lib files, etc.)
+# TODO: spec everything
 
 module Sudoku
   class Checker
@@ -15,16 +16,14 @@ module Sudoku
     def check_freqs(squares)
       results = []
       squares = squares.map { |sq| sq.empty? ? nil : sq.value }.compact
-      collisions = freqs(squares).select { |k, v| v > 1 }
-      if !collisions.empty?
-        results << "collision: #{collisions.inspect}"
-      end
+      collisions = freqs(squares).select { |_, freq| freq > 1 }
+      results << "collision: #{collisions.inspect}" unless collisions.empty?
       results
     end
 
     def check(puzzle)
       results = []
-      if puzzle.leftovers.size != 0
+      unless puzzle.leftovers.empty?
         results << "missing #{puzzle.leftovers.size} squares"
       end
       9.times do |i|
@@ -60,22 +59,16 @@ module Sudoku
         result << horiz_line if row % 3 == 0
         line = @lines[row]
         9.times do |col|
-          if column_before col
-            result << '|'
-          end
+          result << '|' if column_before col
           square = line[col]
           if square.empty?
             result << '_'
+          elsif square.metadata[:found]
+            result << square.value.to_s.green
           else
-            if square.metadata[:found]
-              result << square.value.to_s.green
-            else
-              result << square.value.to_s
-            end
+            result << square.value.to_s
           end
-          if !column_before(col + 1)
-            result << ' '
-          end
+          result << ' ' unless column_before(col + 1)
           result << '|' if col == 8
         end
         result << "\n"
@@ -135,7 +128,7 @@ module Sudoku
     # end ADS
 
     def leftovers
-      squares.select { |sq| sq.empty? }
+      squares.select(&:empty?)
     end
 
     # find mystery values
@@ -147,15 +140,16 @@ module Sudoku
       results = []
       loop_count = 0
       loop do
+        puts
         puts self
         new_results = []
         rules.each do |rule|
           new_results += rule.apply(self)
         end
+        puts new_results
         loop_count += 1
         puts "end of loop #{loop_count}"
-        puts new_results
-        break if new_results.size == 0
+        break if new_results.empty?
       end
       results
     end
@@ -167,13 +161,13 @@ module Sudoku
       if !square.empty?
         square.metadata[:possible_values] = [square.value]
       else
-        square.metadata[:possible_values] ||= [1,2,3,4,5,6,7,8,9]
+        square.metadata[:possible_values] ||= [1, 2, 3, 4, 5, 6, 7, 8, 9]
       end
     end
 
     def check_single_possibility(square)
       result = ''
-      # FIXME duplicated code
+      # FIXME: duplicated code
       if square.metadata[:possible_values].size == 1
         square.value = square.metadata[:possible_values].first
         square.metadata[:found] = true
@@ -192,16 +186,19 @@ module Sudoku
       results = []
       9.times do |box_i|
         squares = puzzle.box(box_i)
-        prohibited_nums = squares.select { |sq| !sq.empty? }.map { |sq| sq.value.to_i }
+        prohibited_nums = squares.reject(&:empty?).map { |sq| sq.value.to_i }
         # puts "nope: #{prohibited_nums.inspect}"
         9.times do |n|
           next if prohibited_nums.include? n
-          candidates = squares.select { |sq| sq.empty? && sq.metadata[:possible_values].include?(n) }
-          if candidates.size == 1
-            results << "Only square in the box that can be #{n}"
-            candidates.first.value = n
-            candidates.first.metadata[:found] = true
+
+          candidates = squares.select do |sq|
+            sq.empty? && sq.metadata[:possible_values].include?(n)
           end
+          next unless candidates.size == 1
+
+          results << "Only square in the box that can be #{n}"
+          candidates.first.value = n
+          candidates.first.metadata[:found] = true
         end
       end
       results
@@ -218,15 +215,15 @@ module Sudoku
         squares = puzzle.box(box_i)
         squares.each do |square|
           init_square square
+          next unless square.empty?
 
-          if square.empty?
-            squares.dup.select { |sq| !sq.empty? }.each do |valued_square|
-              square.metadata[:possible_values].delete(valued_square.value)
-            end
-
-            check = check_single_possibility(square)
-            results << check if !check.empty?
+          squares.dup.reject(&:empty?).each do |valued_square|
+            square.metadata[:possible_values].delete(valued_square.value)
           end
+
+          check = check_single_possibility(square)
+          results << check unless check.empty?
+
           # puts square.metadata.inspect
         end
       end
@@ -245,21 +242,22 @@ module Sudoku
           # row 0, col 1 -> 1
           # row 0, col 8 -> 8
           # row 1, col 0 -> 9
-          square = puzzle.squares[(row*9) + col]
+          square = puzzle.squares[(row * 9) + col]
           init_square square
 
-          if square.empty?
-            puzzle.row(row).dup.select { |square| !square.empty? }.each do |valued_square|
-              square.metadata[:possible_values].delete(valued_square.value)
-            end
+          next unless square.empty?
 
-            puzzle.col(col).dup.select { |square| !square.empty? }.each do |valued_square|
-              square.metadata[:possible_values].delete(valued_square.value)
-            end
-
-            check = check_single_possibility(square)
-            results << check if !check.empty?
+          # TODO: row / col code duplication
+          puzzle.row(row).dup.reject(&:empty?).each do |valued_square|
+            square.metadata[:possible_values].delete(valued_square.value)
           end
+
+          puzzle.col(col).dup.reject(&:empty?).each do |valued_square|
+            square.metadata[:possible_values].delete(valued_square.value)
+          end
+
+          check = check_single_possibility(square)
+          results << check unless check.empty?
 
           # puts square.metadata.inspect
         end
@@ -281,7 +279,7 @@ module Sudoku
     end
 
     def empty?
-      @value.nil? || @value == ' ' || @value == 0
+      @value.nil? || @value == ' ' || @value.zero?
     end
   end
 end
@@ -294,12 +292,12 @@ puts puzzle.leftovers.map(&:metadata)
 puts Sudoku::Checker.new.check(puzzle)
 
 __END__
-    47 5
-  93 5 6
-2  9 8
-  2  4 9
-  68593
- 4 1  8
+    47 5 
+  93 5 6 
+2  9 8   
+  2  4 9 
+  68593  
+ 4 1  8  
    4 6  1
- 6 7 24
- 9 53
+ 6 7 24  
+ 9 53    
