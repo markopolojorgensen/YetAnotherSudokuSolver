@@ -1,11 +1,6 @@
 require 'sudoku'
 
-lines = DATA.read.split("\n")
-puzzle = Sudoku::Puzzle.new lines
-results = puzzle.iterate
-puts results
-puts puzzle.leftovers.map(&:metadata)
-puts Sudoku::Checker.new.check(puzzle)
+Sudoku.do_sudoku DATA.read.split("\n")
 
 __END__
     47 5 

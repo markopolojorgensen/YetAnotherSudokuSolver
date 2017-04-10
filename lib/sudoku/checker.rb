@@ -2,6 +2,7 @@ module Sudoku
   # Validates a puzzle solution. Should be capable of handling incomplete
   # puzzles
   class Checker
+    # https://jerodsanto.net/2013/10/ruby-quick-tip-easily-count-occurrences-of-array-elements/
     def freqs(list)
       result = Hash.new(0)
       list.each do |item|
