@@ -50,7 +50,7 @@ module Sudoku
     end
 
     def horiz_line
-      " _________________ \n"
+      "+-----------------+\n"
     end
 
     def to_s
