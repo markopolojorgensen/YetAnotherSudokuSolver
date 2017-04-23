@@ -6,6 +6,7 @@ require 'sudoku/rule'
 require 'sudoku/puzzle'
 require 'sudoku/checker'
 
+# Top level container module for gem
 module Sudoku
   def self.do_sudoku(lines)
     puzzle = Puzzle.new lines

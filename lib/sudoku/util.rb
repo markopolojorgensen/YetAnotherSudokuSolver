@@ -1,6 +1,7 @@
 module Sudoku
+  # collection of utility methods not necessarily sudoku-related
   module Util
-    # TODO needs a better name?
+    # TODO: needs a better name?
     #
     # takes multiple mult-line strings and combines them to be on the same
     # lines while preserving their internal newlines. Assumes individual

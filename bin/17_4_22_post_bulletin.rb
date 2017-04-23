@@ -6,7 +6,10 @@ puzzle = Sudoku.do_sudoku DATA.read.split("\n")
 puts
 puts puzzle.examine_boxes
 
-# puts Sudoku::Util.complect("123\n123\n123\n", "456\n456\n456\n", "789\n789\n789\n")
+# one = "123\n123\n123\n"
+# two = "456\n456\n456\n"
+# three = "789\n789\n789\n"
+# puts Sudoku::Util.complect(one, two, three)
 puts String.colors
 
 # puts Sudoku::Util.color_row("111\n222\n333\n444\n555\n666\n777", 3, :green)

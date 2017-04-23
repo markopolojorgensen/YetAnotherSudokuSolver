@@ -9,7 +9,7 @@ module Sudoku
     end
 
     def column_before(n)
-      n % 3 == 0
+      (n % 3).zero?
     end
 
     def horiz_line
@@ -20,7 +20,7 @@ module Sudoku
     def to_s
       result = "--puzzle--\n"
       9.times do |row|
-        result << horiz_line if row % 3 == 0
+        result << horiz_line if (row % 3).zero?
         line = @lines[row]
         9.times do |col|
           result << '|' if column_before col
@@ -47,7 +47,7 @@ module Sudoku
         result += Util.complect(examine_box(n1), examine_box(n2), examine_box(n3))
       end
       colorrrr = :cyan
-      # TODO reorganize
+      # TODO: reorganize
       # result = Util.color_col(result, 0, colorrrr)
       # result = Util.color_col(result, 4, colorrrr)
       result = Util.color_row(result, 1, colorrrr)
@@ -64,7 +64,8 @@ module Sudoku
       squares = box(n)
       squares.each_slice(3) do |s1, s2, s3|
         # result += s1.possible_values.inspect + "\n"
-        result += Sudoku::Util.complect(s1.pretty_values, s2.pretty_values, s3.pretty_values)
+        pretty_values = [s1.pretty_values, s2.pretty_values, s3.pretty_values]
+        result += Sudoku::Util.complect(*pretty_values)
         # result += "\n"
       end
       result
@@ -171,7 +172,7 @@ module Sudoku
         result = "+---+\n"
         w = 0
         9.times do |n|
-          result += '|' if (w % 3) == 0
+          result += '|' if (w % 3).zero?
           n += 1
           if possible_values.size == 1 && possible_values.first == n
             result += n.to_s.green

@@ -6,7 +6,8 @@ module Sudoku
       include Common
 
       def apply(puzzle)
-        results = []
+        raise 'bwah' if puzzle.nil? # rubocop
+        results = ["writeme: LineProjectionRule"]
         # 9.times do |box_i|
         #   squares = puzzle.box(box_i)
         #   prohibited_nums = squares.reject(&:empty?).map { |sq| sq.value.to_i }
