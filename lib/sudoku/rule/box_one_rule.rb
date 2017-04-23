@@ -11,6 +11,7 @@ module Sudoku
           prohibited_nums = squares.reject(&:empty?).map { |sq| sq.value.to_i }
           # puts "nope: #{prohibited_nums.inspect}"
           9.times do |n|
+            n += 1 # 0-8 -> 1-9
             next if prohibited_nums.include? n
 
             candidates = squares.select do |sq|

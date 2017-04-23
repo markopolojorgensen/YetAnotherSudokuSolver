@@ -1,6 +1,5 @@
 # Sudoku
 
-
 ###### before
     +-----------------+
     |_ _ _|_ 4 7|_ 5 _|
@@ -34,7 +33,8 @@
 
 ## Usage
 
-TODO: Write usage instructions here
+look at bin/sample.rb
+
 
 ## Contributing
 

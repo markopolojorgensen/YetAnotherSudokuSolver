@@ -1,6 +1,7 @@
 require 'colorize'
 
 require 'sudoku/version'
+require 'sudoku/util'
 require 'sudoku/rule'
 require 'sudoku/puzzle'
 require 'sudoku/checker'
@@ -12,7 +13,9 @@ module Sudoku
     puts results
     puts puzzle.leftovers.map(&:metadata)
     puts Checker.new.check(puzzle)
+    puzzle
   end
 end
 
 # TODO: spec everything
+# TODO: puzzle collection?

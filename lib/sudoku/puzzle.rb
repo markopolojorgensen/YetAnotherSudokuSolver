@@ -41,6 +41,35 @@ module Sudoku
       result
     end
 
+    def examine_boxes
+      result = ''
+      9.times.each_slice(3) do |n1, n2, n3|
+        result += Util.complect(examine_box(n1), examine_box(n2), examine_box(n3))
+      end
+      colorrrr = :cyan
+      # TODO reorganize
+      # result = Util.color_col(result, 0, colorrrr)
+      # result = Util.color_col(result, 4, colorrrr)
+      result = Util.color_row(result, 1, colorrrr)
+      result = Util.color_row(result, 15, colorrrr)
+      result = Util.color_row(result, 17, colorrrr)
+      result = Util.color_row(result, 31, colorrrr)
+      result = Util.color_row(result, 33, colorrrr)
+      result = Util.color_row(result, 47, colorrrr)
+      result
+    end
+
+    def examine_box(n)
+      result = "   --box #{n}--   \n"
+      squares = box(n)
+      squares.each_slice(3) do |s1, s2, s3|
+        # result += s1.possible_values.inspect + "\n"
+        result += Sudoku::Util.complect(s1.pretty_values, s2.pretty_values, s3.pretty_values)
+        # result += "\n"
+      end
+      result
+    end
+
     def squares
       result = []
       @lines.each do |line|
@@ -132,6 +161,34 @@ module Sudoku
 
       def empty?
         @value.nil? || @value == ' ' || @value.zero?
+      end
+
+      def possible_values
+        @metadata[:possible_values] ||= []
+      end
+
+      def pretty_values
+        result = "+---+\n"
+        w = 0
+        9.times do |n|
+          result += '|' if (w % 3) == 0
+          n += 1
+          if possible_values.size == 1 && possible_values.first == n
+            result += n.to_s.green
+          elsif !possible_values.include? n
+            result += n.to_s.black
+          # elsif n == 4
+          #   result += n.to_s.light_magenta
+          elsif possible_values.include? n
+            result += n.to_s.blue
+          else
+            raise 'this should never happen'
+          end
+          result += "|\n" if (w % 3) == 2
+          w += 1
+        end
+        result += "+---+\n"
+        result
       end
     end
   end
